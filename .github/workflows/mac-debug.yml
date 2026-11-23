@@ -40,13 +40,13 @@ jobs:
           exe="$app/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print CFBundleExecutable' "$app/Contents/Info.plist")"
           echo "app: $app"; ls "$app/Contents/MacOS" "$app/Contents/Frameworks"
           codesign -dv "$app" 2>&1 | grep -E "Signature|Format" || true
-          rm -f ~/Library/Logs/DiagnosticReports/*
+          rm -f ~/Library/Logs/DiagnosticReports/*.ips
           ELECTRON_ENABLE_LOGGING=1 ELECTRON_ENABLE_STACK_DUMPING=1 "$exe" --enable-logging=stderr > launch.log 2>&1 &
           pid=$!; sleep 25
           echo "----- stderr -----"; head -c 4000 launch.log
           if kill -0 $pid 2>/dev/null; then echo "RESULT ${{ matrix.variant }}: RUNNING"; kill $pid; exit 0; fi
           echo "RESULT ${{ matrix.variant }}: CRASHED"
-          for f in ~/Library/Logs/DiagnosticReports/*; do
+          for f in ~/Library/Logs/DiagnosticReports/*.ips; do
             echo "== $f"
             python3 - "$f" <<'PY'
           import json, sys
