@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مساعد رئيس القسم</title>
+<meta name="description" content="رقمنة مهام وإجراءات وسجلات رئيس القسم المساعد لما بعد التدرج والبحث العلمي والعلاقات الخارجية">
+<meta name="theme-color" content="#14234a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-64.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-apple-180.png">
+<link rel="stylesheet" href="vendor/fonts/fonts.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <aside class="rail" id="rail">
+    <div class="brand"><img src="icons/logo.png" alt=""><div><b id="brandName">مساعد رئيس القسم</b><small id="brandSub"></small></div></div>
+    <div class="uni" id="uniBox"></div>
+    <nav id="nav"></nav>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div class="tb-title">
+        <button class="btn menu-btn" id="menuBtn" aria-label="القائمة">☰</button>
+        <div style="min-width:0"><h1 id="title"></h1><div class="sub" id="subtitle"></div></div>
+      </div>
+      <div class="tb-tools">
+        <input type="search" class="search" id="gq" aria-label="بحث">
+        <button class="btn" id="langBtn" lang="en">English</button>
+        <button class="btn icon" id="modeBtn">◐</button>
+        <a class="btn" id="themeLink" href="#appearance">الثيم</a>
+      </div>
+    </div>
+    <div class="banner bk" id="backupBanner" hidden></div>
+    <div class="banner" id="banner" hidden><span id="bannerText"></span><button class="btn sm" id="bannerClear"></button></div>
+    <div id="view"></div>
+  </main>
+</div>
+<dialog id="dlg"></dialog>
+<dialog id="dlg2" style="width:min(440px,calc(100vw - 24px))"></dialog>
+<script src="data.js"></script>
+<script src="i18n.js"></script>
+<script src="themes.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
