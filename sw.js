@@ -1,6 +1,6 @@
 /* عامل الخدمة: يجعل البرنامج يعمل دون اتصال بالإنترنت بعد أول فتح */
-const CACHE = "pg-assistant-v14";
-const CORE = ["./", "index.html", "styles.css", "data.js", "i18n.js", "themes.js", "app.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/logo.png", "icons/icon-64.png", "vendor/fonts/fonts.css", "icons/icon-apple-180.png", "vendor/pdfjs/pdf.min.js", "vendor/pdfjs/pdf.worker.min.js"];
+const CACHE = "pg-assistant-v15";
+const CORE = ["./", "index.html", "styles.css", "data.js", "i18n.js", "themes.js", "app.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/logo.png", "icons/icon-64.png", "vendor/fonts/fonts.css", "icons/icon-apple-180.png", "icons/icon-apple-152.png", "icons/icon-apple-167.png", "icons/icon-apple-1024.png", "vendor/pdfjs/pdf.min.js", "vendor/pdfjs/pdf.worker.min.js"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(async c => {
     await c.addAll(CORE);

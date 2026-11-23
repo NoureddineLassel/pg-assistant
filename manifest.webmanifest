@@ -1,6 +1,6 @@
 {
   "name": "مساعد رئيس القسم لما بعد التدرج والعلاقات الخارجية",
-  "short_name": "مساعد القسم",
+  "short_name": "ADC",
   "description": "رقمنة مهام وإجراءات وسجلات رئيس القسم المساعد",
   "lang": "ar",
   "dir": "rtl",
@@ -25,6 +25,13 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-apple-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
     }
-  ]
+  ],
+  "id": "./"
 }
