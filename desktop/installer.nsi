@@ -8,7 +8,7 @@ SetCompressor /SOLID lzma
 !include "MUI2.nsh"
 
 !ifndef VERSION
-  !define VERSION "1.0.0"
+  !define VERSION "1.0.1"
 !endif
 !define APPNAME "مساعد رئيس القسم"
 !define EXE "ADC.exe"

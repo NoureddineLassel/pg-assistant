@@ -1,7 +1,7 @@
 {
   "name": "pg-assistant-desktop",
   "productName": "مساعد رئيس القسم",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "نسخة سطح المكتب (Windows / macOS / Linux) من برنامج مساعد رئيس القسم",
   "main": "main.js",
   "scripts": {
@@ -56,7 +56,10 @@
       ],
       "icon": "../icons/icon-mac-1024.png",
       "category": "public.app-category.productivity",
-      "identity": null
+      "identity": null,
+      "extendInfo": {
+        "CFBundleDisplayName": "مساعد رئيس القسم"
+      }
     },
     "linux": {
       "target": "AppImage",
@@ -70,9 +73,10 @@
       "createStartMenuShortcut": true,
       "shortcutName": "مساعد رئيس القسم",
       "installerIcon": "../icons/icon.ico",
-      "uninstallerIcon": "../icons/icon.ico"
+      "uninstallerIcon": "../icons/icon.ico",
+      "uninstallDisplayName": "مساعد رئيس القسم (ADC)"
     },
-    "productName": "مساعد رئيس القسم",
+    "productName": "ADC",
     "artifactName": "ADC-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "dist"
@@ -80,7 +84,6 @@
     "dmg": {
       "title": "ADC ${version}"
     },
-    "executableName": "ADC",
     "afterPack": "./adhoc-sign.js"
   },
   "author": "قسم العلوم السياسية — جامعة بسكرة"
