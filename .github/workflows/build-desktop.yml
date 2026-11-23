@@ -1,6 +1,7 @@
-# يبني نسخة ويندوز (exe) ونسخة ماك (dmg) على أجهزة GitHub المجانية.
+# يبني نسخة ويندوز (exe) ونسخة ماك (dmg) على أجهزة GitHub المجانية، ثم ينشرهما في صفحة Releases.
 # التشغيل: تبويب Actions ← "Build desktop apps" ← Run workflow. أو تلقائيا عند إنشاء وسم يبدأ بـ v (مثل v1.0.0).
-# Builds the Windows installer (.exe) and the macOS disk image (.dmg) on GitHub-hosted machines.
+# Builds the Windows installer (.exe) and the macOS disk image (.dmg) on GitHub-hosted machines,
+# then publishes both on the repository's Releases page under the version in desktop/package.json.
 name: Build desktop apps
 
 on:
@@ -27,7 +28,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install build tools
         run: npm install --no-audit --no-fund
@@ -35,8 +36,19 @@ jobs:
       - name: Build
         run: npx electron-builder ${{ matrix.args }} --publish never
         env:
-          # no paid certificates: Windows build is unsigned, macOS build is ad-hoc signed
+          # no paid certificates: the Windows build is unsigned; the macOS app is ad-hoc signed by adhoc-sign.js
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - name: Check the macOS signature inside the dmg
+        if: runner.os == 'macOS'
+        run: |
+          dmg=$(ls dist/*.dmg)
+          mnt=$(hdiutil attach -nobrowse -readonly "$dmg" | tail -1 | cut -f3)
+          app=$(ls -d "$mnt"/*.app)
+          codesign --verify --deep --strict --verbose=2 "$app"
+          codesign -dv "$app" 2>&1 | grep -E "Signature|Identifier|Format"
+          lipo -archs "$app/Contents/MacOS/"*
+          hdiutil detach "$mnt"
 
       - name: Upload the installer
         uses: actions/upload-artifact@v4
@@ -47,3 +59,37 @@ jobs:
             desktop/dist/*.dmg
           if-no-files-found: error
           retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+
+      - name: Publish on the Releases page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p "require('./desktop/package.json').version")
+          tag="v$version"
+          ls -la out
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" out/* --clobber
+          else
+            gh release create "$tag" out/* --title "ADC $version" --notes-file - <<'NOTES'
+          ## ADC — مساعد رئيس القسم
+
+          - **ويندوز:** `ADC-*-win-x64.exe` — شغّله؛ إن ظهرت نافذة «Windows protected your PC» اضغط More info ثم Run anyway.
+          - **ماك (Intel وApple):** `ADC-*-mac-universal.dmg` — افتحه واسحب البرنامج إلى Applications. عند أول فتح: macOS 14 وما قبله: زر أيمن ← Open. macOS 15 وما بعده: إعدادات النظام ← الخصوصية والأمان ← Open Anyway.
+          - **الهاتف والآيباد:** ثبّت البرنامج من رابط الموقع عبر «إضافة إلى الشاشة الرئيسية».
+
+          بيانات القسم تبقى على الجهاز ولا تُحذف عند التحديث أو إلغاء التثبيت.
+          NOTES
+          fi
