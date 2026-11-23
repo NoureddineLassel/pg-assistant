@@ -1,0 +1,64 @@
+# Temporary diagnosis of the macOS launch crash: builds variants and launches each one.
+name: macOS launch diagnosis
+
+on:
+  workflow_dispatch:
+
+jobs:
+  variant:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [current, arm64, no-exename, ascii-name, no-sign]
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - name: Apply variant
+        run: |
+          node -e '
+            const fs = require("fs"); const p = JSON.parse(fs.readFileSync("package.json", "utf8")); const b = p.build; const v = process.argv[1];
+            b.mac.target = [{ target: "dir", arch: [v === "arm64" ? "arm64" : "universal"] }];
+            if (v === "no-exename" || v === "ascii-name") delete b.executableName;
+            if (v === "ascii-name") { b.productName = "ADC"; b.mac.extendInfo = { CFBundleDisplayName: "مساعد رئيس القسم" }; }
+            if (v === "no-sign") delete b.afterPack;
+            fs.writeFileSync("package.json", JSON.stringify(p, null, 2));
+            console.log(JSON.stringify({ productName: b.productName, executableName: b.executableName, mac: b.mac, afterPack: b.afterPack }));
+          ' "${{ matrix.variant }}"
+      - run: npx electron-builder --mac --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      - name: Launch
+        run: |
+          app=$(ls -d dist/mac*/*.app | head -1)
+          exe="$app/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print CFBundleExecutable' "$app/Contents/Info.plist")"
+          echo "app: $app"; ls "$app/Contents/MacOS" "$app/Contents/Frameworks"
+          codesign -dv "$app" 2>&1 | grep -E "Signature|Format" || true
+          rm -f ~/Library/Logs/DiagnosticReports/*
+          ELECTRON_ENABLE_LOGGING=1 ELECTRON_ENABLE_STACK_DUMPING=1 "$exe" --enable-logging=stderr > launch.log 2>&1 &
+          pid=$!; sleep 25
+          echo "----- stderr -----"; head -c 4000 launch.log
+          if kill -0 $pid 2>/dev/null; then echo "RESULT ${{ matrix.variant }}: RUNNING"; kill $pid; exit 0; fi
+          echo "RESULT ${{ matrix.variant }}: CRASHED"
+          for f in ~/Library/Logs/DiagnosticReports/*; do
+            echo "== $f"
+            python3 - "$f" <<'PY'
+          import json, sys
+          raw = open(sys.argv[1]).read().split("\n", 1)
+          d = json.loads(raw[1])
+          print("termination:", d.get("termination"))
+          print("asi:", json.dumps(d.get("asi"), ensure_ascii=False)[:3000])
+          t = d["threads"][d.get("faultingThread", 0)]
+          imgs = d.get("usedImages", [])
+          for fr in t["frames"][:12]:
+              im = imgs[fr["imageIndex"]] if fr.get("imageIndex") is not None and fr["imageIndex"] < len(imgs) else {}
+              print("  ", im.get("name"), hex(fr.get("imageOffset", 0)), fr.get("symbol", ""))
+          PY
+          done
+          exit 1
