@@ -1,0 +1,86 @@
+{
+  "name": "pg-assistant-desktop",
+  "productName": "مساعد رئيس القسم",
+  "version": "1.0.0",
+  "description": "نسخة سطح المكتب (Windows / macOS / Linux) من برنامج مساعد رئيس القسم",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "devDependencies": {
+    "electron": "33.4.11",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "dz.univ.pg-assistant",
+    "files": [
+      "main.js",
+      {
+        "from": "..",
+        "to": "app",
+        "filter": [
+          "index.html",
+          "styles.css",
+          "data.js",
+          "i18n.js",
+          "themes.js",
+          "app.js",
+          "manifest.webmanifest",
+          "icons/**",
+          "vendor/**"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "../icons/icon.ico"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "icon": "../icons/icon-mac-1024.png",
+      "category": "public.app-category.productivity",
+      "identity": "-"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "../icons/icon-512.png",
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "مساعد رئيس القسم",
+      "installerIcon": "../icons/icon.ico",
+      "uninstallerIcon": "../icons/icon.ico"
+    },
+    "productName": "مساعد رئيس القسم",
+    "artifactName": "ADC-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "dist"
+    },
+    "dmg": {
+      "title": "ADC ${version}"
+    },
+    "executableName": "ADC"
+  },
+  "author": "قسم العلوم السياسية — جامعة بسكرة"
+}
