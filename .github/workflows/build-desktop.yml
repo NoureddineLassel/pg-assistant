@@ -39,6 +39,34 @@ jobs:
           # no paid certificates: the Windows build is unsigned; the macOS app is ad-hoc signed by adhoc-sign.js
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
 
+      - name: Launch test (macOS) — the app must still be running after 25 seconds
+        if: runner.os == 'macOS'
+        run: |
+          app=$(ls -d dist/mac-universal/*.app)
+          exe="$app/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print CFBundleExecutable' "$app/Contents/Info.plist")"
+          echo "Launching: $exe"
+          "$exe" > launch.log 2>&1 &
+          pid=$!
+          sleep 25
+          if kill -0 $pid 2>/dev/null; then
+            echo "OK: the app is running"; kill $pid
+          else
+            echo "FAILED: the app exited"; cat launch.log
+            for f in ~/Library/Logs/DiagnosticReports/*; do echo "== $f"; head -c 6000 "$f"; done
+            exit 1
+          fi
+
+      - name: Launch test (Windows) — the app must still be running after 25 seconds
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem dist/win-unpacked/*.exe | Select-Object -First 1
+          Write-Host "Launching: $($exe.FullName)"
+          $p = Start-Process $exe.FullName -PassThru
+          Start-Sleep 25
+          if ($p.HasExited) { Write-Error "FAILED: the app exited with code $($p.ExitCode)"; exit 1 }
+          Write-Host "OK: the app is running"; Stop-Process $p.Id -Force
+
       - name: Check the macOS signature inside the dmg
         if: runner.os == 'macOS'
         run: |
